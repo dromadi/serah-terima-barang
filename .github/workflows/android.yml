@@ -7,47 +7,36 @@ on:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_SDK_ROOT: ${{ runner.tool_cache }}/android-sdk
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
 
-    - name: Install system & Python-for-Android deps
+    - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y \
-          git zip unzip openjdk-17-jdk python3-pip python3-venv \
-          python3-dev libffi-dev libssl-dev libsqlite3-dev \
-          libjpeg-dev zlib1g-dev build-essential autoconf automake libtool pkg-config \
-          libncurses5-dev libncursesw5-dev libreadline-dev libbz2-dev liblzma-dev
-        pip install cython
-
-      - name: Install Buildozer
-        run: pip install --upgrade buildozer
-
-      - name: Prepare buildozer spec
-        run: cp .github/buildozer.spec buildozer.spec
+        sudo apt-get install -y           git zip unzip openjdk-17-jdk python3-pip python3-venv           python3-dev libffi-dev libssl-dev libsqlite3-dev           libjpeg-dev zlib1g-dev build-essential autoconf automake libtool pkg-config           libncurses5-dev libncursesw5-dev libreadline-dev libbz2-dev liblzma-dev
+        pip install cython buildozer
 
     - name: Install Android Command-Line Tools
       run: |
-        mkdir -p $HOME/android-sdk/cmdline-tools
-        curl -sS https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip \
-          -o cmdline-tools.zip
-        unzip -q cmdline-tools.zip -d $HOME/android-sdk/cmdline-tools
-        mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
-        echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-        echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
-        echo "PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$PATH" >> $GITHUB_ENV
+        mkdir -p $ANDROID_SDK_ROOT/cmdline-tools/latest
+        curl -sS https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -o cmdline-tools.zip
+        unzip -q cmdline-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
+        mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools/* $ANDROID_SDK_ROOT/cmdline-tools/latest/
+        echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+        echo "PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH" >> $GITHUB_ENV
 
     - name: Accept SDK Licenses & Install Platforms
       run: |
-        yes | sdkmanager --sdk_root=${{ env.ANDROID_SDK_ROOT }} --licenses
-        sdkmanager --sdk_root=${{ env.ANDROID_SDK_ROOT }} "platform-tools" "platforms;android-31" "build-tools;31.0.0"
+        yes | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --licenses
+        sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platform-tools" "platforms;android-31" "build-tools;31.0.0"
 
     - name: Build APK
       run: buildozer --verbose android debug
