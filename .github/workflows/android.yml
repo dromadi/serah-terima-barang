@@ -9,14 +9,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v3
 
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
 
-    - name: Install Buildozer & Dependencies
+    - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip python3-venv
@@ -35,7 +36,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: app-debug.apk
         path: bin/android/debug/*.apk
