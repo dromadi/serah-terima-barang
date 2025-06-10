@@ -1,0 +1,56 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    env:
+      ANDROID_SDK_ROOT: ${{ runner.tool_cache }}/android-sdk
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y           git zip unzip openjdk-17-jdk python3-pip python3-venv           python3-dev libffi-dev libssl-dev libsqlite3-dev           libjpeg-dev zlib1g-dev build-essential autoconf automake libtool pkg-config           libncurses5-dev libncursesw5-dev libreadline-dev libbz2-dev liblzma-dev
+        pip install cython buildozer
+
+    - name: Install Android Command-Line Tools
+      run: |
+        mkdir -p $ANDROID_SDK_ROOT/cmdline-tools/latest
+        curl -sS https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -o cmdline-tools.zip
+        unzip -q cmdline-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
+        mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools/* $ANDROID_SDK_ROOT/cmdline-tools/latest/
+        echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+        echo "PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH" >> $GITHUB_ENV
+
+    - name: Accept SDK Licenses & Install Platforms
+      run: |
+        yes | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --licenses
+        sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platform-tools" "platforms;android-31" "build-tools;31.0.0"
+
+    - name: Build APK
+      run: buildozer --verbose android debug
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v1.0.${{ github.run_number }}
+        name: APK v1.0.${{ github.run_number }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug.apk
+        path: bin/android/debug/*.apk
