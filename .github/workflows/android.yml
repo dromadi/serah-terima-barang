@@ -1,3 +1,4 @@
+# .github/workflows/android.yml
 name: Build Android APK
 
 on:
@@ -17,17 +18,27 @@ jobs:
       with:
         python-version: '3.9'
 
-    - name: Install dependencies
+    - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip python3-venv
+        sudo apt-get install -y \
+          git zip unzip openjdk-17-jdk python3-pip python3-venv \
+          python3-dev libffi-dev libssl-dev libsqlite3-dev \
+          libjpeg-dev zlib1g-dev build-essential autoconf automake libtool pkg-config \
+          libncurses5-dev libncursesw5-dev libreadline-dev libbz2-dev liblzma-dev
+        # Cython untuk p4a
+        pip install cython
+
+    - name: Install Buildozer & p4a
+      run: |
         pip install --upgrade buildozer
+        # (opsional) cache direktori ~/.local/share/python-for-android
 
     - name: Build APK
       run: |
         buildozer --verbose android debug
 
-    - name: Upload APK to Release
+    - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
         tag_name: v1.0.${{ github.run_number }}
