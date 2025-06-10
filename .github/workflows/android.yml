@@ -27,8 +27,11 @@ jobs:
           libncurses5-dev libncursesw5-dev libreadline-dev libbz2-dev liblzma-dev
         pip install cython
 
-    - name: Install Buildozer
-      run: pip install --upgrade buildozer
+      - name: Install Buildozer
+        run: pip install --upgrade buildozer
+
+      - name: Prepare buildozer spec
+        run: cp .github/buildozer.spec buildozer.spec
 
     - name: Install Android Command-Line Tools
       run: |
