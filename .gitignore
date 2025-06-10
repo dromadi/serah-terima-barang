@@ -1,0 +1,6 @@
+# Build artifacts
+bin/
+*.apk
+*.keystore
+__pycache__/
+*.pyc
