@@ -82,6 +82,15 @@ ScreenManager:
             id: keterangan
             hint_text: 'Keterangan'
             multiline: False
+        Label:
+            id: status
+            text: ''
+            color: 1, 0, 0, 1
+            size_hint_y: None
+            height: '20dp'
+            halign: 'left'
+            valign: 'middle'
+            text_size: self.size
         BoxLayout:
             size_hint_y: None
             height: '48dp'
@@ -91,7 +100,9 @@ ScreenManager:
                 on_release: app.save_transaction()
             Button:
                 text: 'Batal'
-                on_release: root.manager.current = 'home'
+                on_release:
+                    app.reset_form()
+                    root.manager.current = 'home'
 '''
 
 class HomeScreen(Screen):
@@ -140,23 +151,55 @@ class TransactionApp(App):
         penyerah = screen.penyerah.text.strip()
         penerima = screen.penerima.text.strip()
         keterangan = screen.keterangan.text.strip()
-        if not nama or not jumlah:
+        if not nama:
+            self.set_status('Nama barang wajib diisi.')
+            return
+        if not jumlah:
+            self.set_status('Jumlah wajib diisi.')
+            return
+        if not satuan:
+            self.set_status('Satuan wajib diisi.')
+            return
+        if not penyerah:
+            self.set_status('Penyerah wajib diisi.')
+            return
+        if not penerima:
+            self.set_status('Penerima wajib diisi.')
+            return
+        try:
+            jumlah_int = int(jumlah)
+            if jumlah_int <= 0:
+                self.set_status('Jumlah harus lebih dari 0.')
+                return
+        except ValueError:
+            self.set_status('Jumlah harus berupa angka.')
             return
         tanggal = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         c = self.db_conn.cursor()
         c.execute(
             "INSERT INTO transaksi (tanggal, nama_barang, jumlah, satuan, penyerah, penerima, keterangan) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (tanggal, nama, int(jumlah), satuan, penyerah, penerima, keterangan)
+            (tanggal, nama, jumlah_int, satuan, penyerah, penerima, keterangan)
         )
         self.db_conn.commit()
+        self.reset_form()
+        self.sm.current = 'home'
+        self.load_transactions()
+
+    def reset_form(self):
+        screen = self.sm.get_screen('add')
         screen.nama.text = ''
         screen.jumlah.text = ''
         screen.satuan.text = ''
         screen.penyerah.text = ''
         screen.penerima.text = ''
         screen.keterangan.text = ''
-        self.sm.current = 'home'
-        self.load_transactions()
+        screen.ids.status.text = ''
+        screen.ids.status.color = (1, 0, 0, 1)
+
+    def set_status(self, message, color=(1, 0, 0, 1)):
+        screen = self.sm.get_screen('add')
+        screen.ids.status.text = message
+        screen.ids.status.color = color
 
 if __name__ == '__main__':
     TransactionApp().run()
