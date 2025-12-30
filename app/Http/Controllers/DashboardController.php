@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BorrowRequest;
 use App\Models\DamageReport;
+use App\Models\RepairJob;
 use App\Models\Tool;
 
 class DashboardController extends Controller
@@ -20,7 +21,7 @@ class DashboardController extends Controller
             'overdue' => BorrowRequest::whereIn('status', ['APPROVED_FINAL', 'DISPATCHED'])
                 ->whereDate('planned_return_at', '<', now()->toDateString())
                 ->count(),
-            'repairCostMonth' => DamageReport::whereMonth('created_at', now()->month)->sum('repair_cost_idr'),
+            'repairCostMonth' => RepairJob::whereMonth('created_at', now()->month)->sum('repair_cost_idr'),
         ]);
     }
 }

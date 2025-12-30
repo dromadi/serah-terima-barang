@@ -63,8 +63,9 @@ class ReportController extends Controller
                     'Usulan Tindak Lanjut', 'Progress Perbaikan', 'Nama Mitra/Swakelola', 'Tanggal Kirim', 'Surat Jalan Kirim',
                     'Rencana Kembali', 'Nilai Perbaikan', 'Tanggal Terima', 'Surat Jalan Terima', 'Hasil Akhir', 'Status', 'Keterangan'
                 ]);
-                DamageReport::with(['tool', 'workType', 'reporter'])->chunk(200, function ($rows) use ($handle) {
+                DamageReport::with(['tool', 'workType', 'reporter', 'repairJob.vendor'])->chunk(200, function ($rows) use ($handle) {
                     foreach ($rows as $row) {
+                        $repairJob = $row->repairJob;
                         fputcsv($handle, [
                             $row->ticket_no,
                             optional($row->reported_at)->format('d-M-Y'),
@@ -79,15 +80,15 @@ class ReportController extends Controller
                             $row->priority,
                             $row->verification_result,
                             $row->recommendation,
-                            $row->progress,
-                            $row->vendor_name,
-                            optional($row->sent_at)->format('d-M-Y'),
-                            $row->surat_jalan_repair_kirim,
-                            optional($row->planned_return_at)->format('d-M-Y'),
-                            $row->repair_cost_idr,
-                            optional($row->received_at)->format('d-M-Y'),
-                            $row->surat_jalan_repair_terima,
-                            $row->hasil_akhir,
+                            $repairJob?->progress_status,
+                            $repairJob?->vendor?->vendor_name,
+                            optional($repairJob?->sent_at)->format('d-M-Y'),
+                            $repairJob?->surat_jalan_kirim,
+                            optional($repairJob?->planned_finish_at)->format('d-M-Y'),
+                            $repairJob?->repair_cost_idr,
+                            optional($repairJob?->received_at)->format('d-M-Y'),
+                            $repairJob?->surat_jalan_terima,
+                            $repairJob?->hasil_akhir,
                             $row->status,
                             $row->remark,
                         ]);

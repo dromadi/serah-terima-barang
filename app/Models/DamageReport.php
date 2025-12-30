@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class DamageReport extends BaseModel
 {
@@ -28,5 +29,10 @@ class DamageReport extends BaseModel
     public function reporter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reported_by_user_id');
+    }
+
+    public function repairJob(): HasOne
+    {
+        return $this->hasOne(RepairJob::class);
     }
 }
