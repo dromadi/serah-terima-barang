@@ -114,7 +114,8 @@
             backdrop-filter: blur(10px);
         }
 
-        .topbar-title h5 {
+        .topbar-title h5,
+        .topbar-title h6 {
             margin-bottom: 4px;
             font-weight: 600;
         }
@@ -130,19 +131,31 @@
             gap: 16px;
         }
 
-        .search-input {
+        .search-input-group {
             background: #1b2332;
             border: 1px solid transparent;
-            color: #e2e8f0;
-            padding: 10px 16px;
             border-radius: 12px;
+            padding: 4px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             width: 320px;
         }
 
-        .search-input:focus {
-            outline: none;
+        .search-input-group:focus-within {
             border-color: var(--trl-primary);
             box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.2);
+        }
+
+        .search-input {
+            background: transparent;
+            border: none;
+            color: #e2e8f0;
+            width: 100%;
+        }
+
+        .search-input::placeholder {
+            color: #94a3b8;
         }
 
         .notification {
@@ -174,6 +187,92 @@
 
         .card-dark h6 {
             color: var(--trl-muted);
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .breadcrumb-trail {
+            color: var(--trl-muted);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .breadcrumb-trail i {
+            color: #94a3b8;
+        }
+
+        .section-subtitle {
+            color: var(--trl-muted);
+        }
+
+        .filter-panel {
+            background: #0f172a;
+            border: 1px solid var(--trl-border);
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        .soft-input {
+            background: #1b2332;
+            border: none;
+            color: #e2e8f0;
+            border-radius: 12px;
+        }
+
+        .soft-input:focus {
+            background: #1b2332;
+            border-color: var(--trl-primary);
+            box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.2);
+            color: #e2e8f0;
+        }
+
+        .pill-tabs .nav-link {
+            color: var(--trl-muted);
+            background: #1b2332;
+            border-radius: 10px;
+            padding: 8px 16px;
+            border: none;
+        }
+
+        .pill-tabs .nav-link.active {
+            color: #fff;
+            background: #0b1220;
+            border: 1px solid var(--trl-border);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 16px;
+            color: var(--trl-muted);
+        }
+
+        .empty-state .icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: #1b2332;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 16px;
+            font-size: 28px;
+            color: #94a3b8;
+        }
+
+        .export-card {
+            background: #0f172a;
+            border: 1px solid var(--trl-border);
+            border-radius: 16px;
+            padding: 20px;
+            height: 100%;
         }
 
         .stats-icon {
@@ -242,7 +341,7 @@
                 display: none;
             }
 
-            .search-input {
+            .search-input-group {
                 width: 100%;
             }
 
@@ -297,11 +396,18 @@
     <div class="main-panel">
         <header class="topbar">
             <div class="topbar-title">
-                <h5>Selamat datang, {{ auth()->user()->email ?? 'admin@trl.localt' }}</h5>
-                <span>Dashboard TRL</span>
+                @hasSection('topbar-title')
+                    @yield('topbar-title')
+                @else
+                    <h5>Selamat datang, {{ auth()->user()->email ?? 'admin@trl.localt' }}</h5>
+                    <span>Dashboard TRL</span>
+                @endif
             </div>
             <div class="topbar-actions">
-                <input class="search-input" type="text" placeholder="Cari..." aria-label="Cari">
+                <div class="search-input-group">
+                    <i class="bi bi-search text-muted"></i>
+                    <input class="search-input" type="text" placeholder="Cari..." aria-label="Cari">
+                </div>
                 <div class="notification">
                     <i class="bi bi-bell"></i>
                     <span class="badge rounded-pill">3</span>
