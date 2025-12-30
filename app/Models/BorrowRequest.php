@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class BorrowRequest extends BaseModel
 {
@@ -36,13 +37,13 @@ class BorrowRequest extends BaseModel
         return $this->hasMany(BorrowItem::class);
     }
 
-    public function shipment(): BelongsTo
+    public function shipment(): HasOne
     {
-        return $this->belongsTo(Shipment::class, 'id', 'borrow_request_id');
+        return $this->hasOne(Shipment::class, 'borrow_request_id');
     }
 
-    public function returnEntry(): BelongsTo
+    public function returnEntry(): HasOne
     {
-        return $this->belongsTo(ReturnEntry::class, 'id', 'borrow_request_id');
+        return $this->hasOne(ReturnEntry::class, 'borrow_request_id');
     }
 }
